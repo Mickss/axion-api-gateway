@@ -9,31 +9,31 @@ import org.slf4j.LoggerFactory;
 
 public class AxionApiGatewayApplication {
 
-	private static final Logger log = LoggerFactory.getLogger(AxionApiGatewayApplication.class);
+    private static final Logger log = LoggerFactory.getLogger(AxionApiGatewayApplication.class);
 
-	private static AppConfig appConfig;
+    private static AppConfig appConfig;
 
-	public static void main(String[] args) {
-		appConfig = new AppConfig();
+    public static void main(String[] args) {
+        appConfig = new AppConfig();
 
-		Javalin app = Javalin.create().start(22286);
+        Javalin app = Javalin.create().start(22286);
 
-		app.get("/api/*", AxionApiGatewayApplication::forwardRequest);
-		app.post("/api/*", AxionApiGatewayApplication::forwardRequest);
-		app.put("/api/*", AxionApiGatewayApplication::forwardRequest);
-		app.patch("/api/*", AxionApiGatewayApplication::forwardRequest);
-		app.delete("/api/*", AxionApiGatewayApplication::forwardRequest);
-	}
+        app.get("/api/*", AxionApiGatewayApplication::forwardRequest);
+        app.post("/api/*", AxionApiGatewayApplication::forwardRequest);
+        app.put("/api/*", AxionApiGatewayApplication::forwardRequest);
+        app.patch("/api/*", AxionApiGatewayApplication::forwardRequest);
+        app.delete("/api/*", AxionApiGatewayApplication::forwardRequest);
+    }
 
-	private static void forwardRequest(Context ctx) {
-		log.info("Will forward request: {}", ctx.req().getRequestURI());
-		RequestHandler requestHandler = new RequestHandler(appConfig);
+    private static void forwardRequest(Context ctx) {
+        log.info("Will forward request: {}", ctx.req().getRequestURI());
+        RequestHandler requestHandler = new RequestHandler(appConfig);
         try {
             String targetUrl = requestHandler.prepareTargetUrl(ctx);
-			requestHandler.forwardRequestForUrl(ctx, targetUrl);
+            requestHandler.forwardRequestForUrl(ctx, targetUrl);
         } catch (ConfigNotFoundException e) {
-			log.warn("Cannot recognise target URL for path: {}", ctx.path());
+            log.warn("Cannot recognise target URL for path: {}", ctx.path());
             ctx.status(404).result("Cannot recognise target URL for path: " + ctx.path());
         }
-	}
+    }
 }
