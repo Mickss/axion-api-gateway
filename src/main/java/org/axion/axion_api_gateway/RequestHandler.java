@@ -1,14 +1,17 @@
 package org.axion.axion_api_gateway;
 
 import io.javalin.http.Context;
-import okhttp3.*;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 import org.axion.axion_api_gateway.config.AppConfig;
 import org.axion.axion_api_gateway.config.ConfigNotFoundException;
 import org.axion.axion_api_gateway.config.ServiceConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.Objects;
 
 public class RequestHandler {
@@ -43,7 +46,7 @@ public class RequestHandler {
             ctx.status(response.code());
             response.headers().forEach(responseHeader -> ctx.header(responseHeader.getFirst(), responseHeader.getSecond()));
             ctx.result(Objects.requireNonNull(response.body()).string());
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error(String.format("Exception while forwarding request to: %s", targetUrl), e);
             ctx.status(500);
         }
