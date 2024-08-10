@@ -30,7 +30,7 @@ public class AxionApiGatewayApplication {
 
     private static void forwardRequest(Context ctx) {
         log.info("Will forward request: {}", ctx.req().getRequestURI());
-        RequestValidator requestValidator = new RequestValidator();
+        RequestValidator requestValidator = new RequestValidator(appConfig);
         requestValidator.checkRequestViolations(ctx.req());
         RequestHandler requestHandler = new RequestHandler(appConfig);
         try {
