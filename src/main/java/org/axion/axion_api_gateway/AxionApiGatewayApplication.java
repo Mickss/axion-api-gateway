@@ -23,10 +23,15 @@ public class AxionApiGatewayApplication {
         app.put("/api/*", AxionApiGatewayApplication::forwardRequest);
         app.patch("/api/*", AxionApiGatewayApplication::forwardRequest);
         app.delete("/api/*", AxionApiGatewayApplication::forwardRequest);
+
+        app.exception(RequestValidationException.class, (e, ctx) -> ctx.status(e.getHttpStatus().getStatusCode())
+                .result(e.getMessage()));
     }
 
     private static void forwardRequest(Context ctx) {
         log.info("Will forward request: {}", ctx.req().getRequestURI());
+        RequestValidator requestValidator = new RequestValidator(appConfig);
+        requestValidator.checkRequestViolations(ctx.req());
         RequestHandler requestHandler = new RequestHandler(appConfig);
         try {
             String targetUrl = requestHandler.prepareTargetUrl(ctx);
