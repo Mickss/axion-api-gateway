@@ -1,6 +1,5 @@
 package org.axion.axion_api_gateway;
 
-import com.typesafe.config.Config;
 import jakarta.servlet.http.HttpServletRequest;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -16,6 +15,7 @@ import org.slf4j.LoggerFactory;
 public class RequestValidator {
 
     private final AppConfig appConfig;
+
     public RequestValidator(AppConfig appConfig) {
         this.appConfig = appConfig;
     }
@@ -29,16 +29,14 @@ public class RequestValidator {
         if (header == null || header.isEmpty()) {
             throw new RequestValidationException("Authorization header is missing or empty", HttpStatus.BAD_REQUEST);
         }
-
         String token = header.substring("Bearer ".length());
-
         boolean isTokenValid = validateTokenWithAuthService(token);
         if (!isTokenValid) {
             throw new RequestValidationException("Invalid token", HttpStatus.UNAUTHENTICATED);
         }
     }
 
-    public String createJson(String token) {
+    private String createJson(String token) {
         return "{"
                 + "\"token\":\"" + token + "\""
                 + "}";
