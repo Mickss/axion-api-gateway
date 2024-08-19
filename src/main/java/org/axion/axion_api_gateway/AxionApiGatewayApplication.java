@@ -30,8 +30,13 @@ public class AxionApiGatewayApplication {
 
     private static void forwardRequest(Context ctx) {
         log.info("Will forward request: {}", ctx.req().getRequestURI());
-        RequestValidator requestValidator = new RequestValidator(appConfig);
-        requestValidator.checkRequestViolations(ctx.req());
+        String requestURI = ctx.req().getRequestURI();
+        if (!isPublicEndpoint(requestURI)) {
+            RequestValidator requestValidator = new RequestValidator(appConfig);
+            requestValidator.checkRequestViolations(ctx.req());
+        } else {
+            log.info("Skipping JWT validation for public endpoint: {}", requestURI);
+        }
         RequestHandler requestHandler = new RequestHandler(appConfig);
         try {
             String targetUrl = requestHandler.prepareTargetUrl(ctx);
@@ -40,5 +45,13 @@ public class AxionApiGatewayApplication {
             log.warn("Cannot recognise target URL for path: {}", ctx.path());
             ctx.status(404).result("Cannot recognise target URL for path: " + ctx.path());
         }
+    }
+
+    private static boolean isPublicEndpoint(String requestURI) {
+        String[] uriSegments = requestURI.split("/");
+        if (uriSegments.length > 3) {
+            return uriSegments[3].equals("public");
+        }
+        return false;
     }
 }
