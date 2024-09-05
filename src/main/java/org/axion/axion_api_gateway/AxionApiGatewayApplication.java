@@ -16,7 +16,7 @@ public class AxionApiGatewayApplication {
     public static void main(String[] args) {
         appConfig = new AppConfig();
 
-        Javalin app = Javalin.create().start(22286);
+        Javalin app = Javalin.create().start(24001);
 
         app.get("/api/*", AxionApiGatewayApplication::forwardRequest);
         app.post("/api/*", AxionApiGatewayApplication::forwardRequest);
