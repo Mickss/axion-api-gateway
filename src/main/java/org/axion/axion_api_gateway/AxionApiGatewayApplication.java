@@ -16,7 +16,18 @@ public class AxionApiGatewayApplication {
     public static void main(String[] args) {
         appConfig = new AppConfig();
 
-        Javalin app = Javalin.create().start(24001);
+        Javalin app = Javalin.create(
+                        config -> config.bundledPlugins.enableCors(
+                                cors -> cors.addRule(
+                                        rule -> {
+                                            rule.allowHost(
+                                                    "https://app.disc-golf.pl",
+                                                    "http://localhost:3000"
+                                            );
+                                            rule.allowCredentials = true;
+                                        }
+                                )))
+                .start(24001);
 
         app.get("/api/*", AxionApiGatewayApplication::forwardRequest);
         app.post("/api/*", AxionApiGatewayApplication::forwardRequest);
