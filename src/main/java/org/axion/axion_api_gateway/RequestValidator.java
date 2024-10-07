@@ -34,6 +34,7 @@ public class RequestValidator {
         if (!isTokenValid) {
             throw new RequestValidationException("Invalid token", HttpStatus.UNAUTHENTICATED);
         }
+        // TODO if POST without body, handle gracefully returning 400 bad request
     }
 
     private String createJson(String token) {
@@ -53,11 +54,18 @@ public class RequestValidator {
             throw new RuntimeException("Cannot load auth config", e);
         }
         Request request = new Request.Builder()
-                .url("http://localhost:" + authServiceConfig.port() + "/auth/validate")
+                .url("http://localhost:" + authServiceConfig.port() + "/public/auth/validate")
                 .post(body)
                 .build();
         try (Response response = client.newCall(request).execute()) {
-            return response.isSuccessful();
+            if (response.isSuccessful()) {
+                return true;
+            }
+            if (response.code() == 401 || response.code() == 403) {
+                return false;
+            }
+            log.error("Unexpected response from auth service: {}. Message: {}", response.code(), response.message());
+            throw new IllegalStateException("Unexpected response code: " + response.code());
         } catch (Exception e) {
             log.error("Error while sending post request to auth-service", e);
             throw new RequestValidationException("Internal Server Error", HttpStatus.SERVER_ERROR);
