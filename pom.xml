@@ -6,6 +6,15 @@
 	<artifactId>axion-api-gateway</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>axion-api-gateway</name>
+
+	<distributionManagement>
+		<snapshotRepository>
+			<id>github</id>
+			<name>GitHub Repository</name>
+			<url>https://maven.pkg.github.com/Mickss/axion-api-gateway</url>
+		</snapshotRepository>
+	</distributionManagement>
+
 	<properties>
 		<maven.compiler.source>22</maven.compiler.source>
 		<maven.compiler.target>22</maven.compiler.target>
