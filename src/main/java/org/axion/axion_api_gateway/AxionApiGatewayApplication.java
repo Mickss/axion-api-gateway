@@ -59,7 +59,7 @@ public class AxionApiGatewayApplication {
         }
     }
 
-    static boolean isPublicEndpoint(String requestURI) {
+    private static boolean isPublicEndpoint(String requestURI) {
         String[] uriSegments = requestURI.split("/");
         if (uriSegments.length > 3) {
             return uriSegments[3].equals("public");
