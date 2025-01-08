@@ -9,6 +9,7 @@ import okhttp3.Response;
 import org.axion.axion_api_gateway.config.AppConfig;
 import org.axion.axion_api_gateway.config.ConfigNotFoundException;
 import org.axion.axion_api_gateway.config.ServiceConfig;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,10 +34,14 @@ public class RequestHandler {
         return url + (ctx.queryString() != null ? "?" + ctx.queryString() : "");
     }
 
-    public void forwardRequestForUrl(Context ctx, String targetUrl) {
+    public void forwardRequestForUrl(Context ctx, String targetUrl, @Nullable UserDTO userDTO) {
         Request.Builder requestBuilder = new Request.Builder()
                 .url(targetUrl)
                 .method(ctx.method().name(), !ctx.body().isEmpty() ? createRequestBody(ctx) : null);
+        if (userDTO != null && userDTO.getUserId() != null) {
+            requestBuilder.addHeader("X-User-Id", userDTO.getUserId());
+        }
+
         ctx.headerMap().forEach(requestBuilder::addHeader);
         Request request = requestBuilder.build();
 
@@ -44,11 +49,15 @@ public class RequestHandler {
         try (Response response = client.newCall(request).execute()) {
             log.info("Response received: {}", response.code());
             ctx.status(response.code());
-            response.headers().forEach(responseHeader -> ctx.header(responseHeader.getFirst(), responseHeader.getSecond()));
+            response.headers().forEach(responseHeader -> {
+                if (!responseHeader.getFirst().equals("Access-Control-Allow-Origin")) {
+                    ctx.header(responseHeader.getFirst(), responseHeader.getSecond());
+                }
+            });
             ctx.result(Objects.requireNonNull(response.body()).string());
         } catch (Exception e) {
             log.error(String.format("Exception while forwarding request to: %s", targetUrl), e);
-            ctx.status(500);
+            ctx.status(500).result("Internal Server Error");
         }
     }
 
