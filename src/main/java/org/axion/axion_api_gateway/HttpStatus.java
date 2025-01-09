@@ -2,9 +2,10 @@ package org.axion.axion_api_gateway;
 
 public enum HttpStatus {
 
-    UNAUTHENTICATED(401),
     BAD_REQUEST(400),
-    SERVER_ERROR(500);
+    FORBIDDEN(403),
+    SERVER_ERROR(500),
+    UNAUTHORIZED(401);
 
     private final int statusCode;
 
