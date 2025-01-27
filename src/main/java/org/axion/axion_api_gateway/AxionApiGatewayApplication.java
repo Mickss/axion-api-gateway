@@ -12,9 +12,11 @@ public class AxionApiGatewayApplication {
     private static final Logger log = LoggerFactory.getLogger(AxionApiGatewayApplication.class);
 
     private static AppConfig appConfig;
+    private static UserSession userSession;
 
     public static void main(String[] args) {
         appConfig = new AppConfig();
+        userSession = new UserSession(appConfig);
 
         Javalin app = Javalin.create(
                         config -> config.bundledPlugins.enableCors(
@@ -29,6 +31,8 @@ public class AxionApiGatewayApplication {
                                 )))
                 .start(24001);
 
+        app.get("/api/current-session", AxionApiGatewayApplication::currentSession);
+
         app.get("/api/*", AxionApiGatewayApplication::forwardRequest);
         app.post("/api/*", AxionApiGatewayApplication::forwardRequest);
         app.put("/api/*", AxionApiGatewayApplication::forwardRequest);
@@ -39,13 +43,18 @@ public class AxionApiGatewayApplication {
                 .result(e.getMessage()));
     }
 
+    private static void currentSession(Context ctx) {
+        UserDTO userDTO = userSession.getLoggedInUser(ctx.req());
+        ctx.status(200);
+        ctx.result(userDTO.getUsername());
+    }
+
     private static void forwardRequest(Context ctx) {
         log.info("Will forward request: {}", ctx.req().getRequestURI());
         String requestURI = ctx.req().getRequestURI();
         UserDTO userDTO = null;
         if (!isPublicEndpoint(requestURI)) {
-            RequestValidator requestValidator = new RequestValidator(appConfig);
-            userDTO = requestValidator.getLoggedInUser(ctx.req());
+            userDTO = userSession.getLoggedInUser(ctx.req());
         } else {
             log.info("Skipping JWT validation for public endpoint: {}", requestURI);
         }

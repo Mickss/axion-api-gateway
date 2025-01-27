@@ -12,18 +12,19 @@ import org.axion.axion_api_gateway.config.ServiceConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 
-public class RequestValidator {
+public class UserSession {
 
     private final AppConfig appConfig;
 
-    public RequestValidator(AppConfig appConfig) {
+    public UserSession(AppConfig appConfig) {
         this.appConfig = appConfig;
     }
 
-    private static final Logger log = LoggerFactory.getLogger(RequestValidator.class);
+    private static final Logger log = LoggerFactory.getLogger(UserSession.class);
 
     public UserDTO getLoggedInUser(HttpServletRequest request) {
         String cookieHeader = request.getHeader("Cookie");
@@ -55,7 +56,7 @@ public class RequestValidator {
                 .build();
 
         try (Response response = client.newCall(request).execute()) {
-            if (response.isSuccessful()) {
+            if (response.isSuccessful() && response.body() != null) {
                 log.info("Validation successful for user ID: {}", token);
                 return parseUserDTO(response.body().string());
             }
@@ -67,7 +68,7 @@ public class RequestValidator {
             }
             log.error("Unexpected response from auth service: {}. Message: {}", response.code(), response.message());
             throw new IllegalStateException("Unexpected response code: " + response.code());
-        } catch (Exception e) {
+        } catch (IOException e) {
             log.error("Error while sending request to auth-service", e);
             throw new RequestValidationException("Internal Server Error", HttpStatus.SERVER_ERROR);
         }
