@@ -41,6 +41,9 @@ public class RequestHandler {
         if (userDTO != null && userDTO.getUserId() != null) {
             requestBuilder.addHeader("X-User-Id", userDTO.getUserId());
         }
+        if (userDTO != null && userDTO.getRole() != null) {
+            requestBuilder.addHeader("X-User-Role", userDTO.getRole());
+        }
 
         ctx.headerMap().forEach(requestBuilder::addHeader);
         Request request = requestBuilder.build();
