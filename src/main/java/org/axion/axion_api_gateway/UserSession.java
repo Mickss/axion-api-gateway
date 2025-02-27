@@ -28,6 +28,9 @@ public class UserSession {
 
     public UserDTO getLoggedInUser(HttpServletRequest request) {
         String cookieHeader = request.getHeader("Cookie");
+        if (cookieHeader == null) {
+            throw new RequestValidationException("No cookie header", HttpStatus.UNAUTHORIZED);
+        }
         String[] cookiesArray = cookieHeader.split(";");
         HashMap<String, String> cookieMap = new HashMap<>();
         Arrays.stream(cookiesArray).forEach(cookie -> {
