@@ -46,7 +46,7 @@ public class AxionApiGatewayApplication {
     private static void currentSession(Context ctx) {
         UserDTO userDTO = userSession.getLoggedInUser(ctx.req());
         ctx.status(200);
-        ctx.result(userDTO.getUsername());
+        ctx.json(userDTO);
     }
 
     private static void forwardRequest(Context ctx) {
