@@ -35,7 +35,7 @@ public class UserSession {
         HashMap<String, String> cookieMap = new HashMap<>();
         Arrays.stream(cookiesArray).forEach(cookie -> {
             String[] cookiePair = cookie.split("=");
-            cookieMap.put(cookiePair[0], cookiePair[1]);
+            cookieMap.put(cookiePair[0].trim(), cookiePair[1]);
         });
         UserDTO user = fetchUserFromAuthService(cookieMap.get("token"));
         if (user == null) {
