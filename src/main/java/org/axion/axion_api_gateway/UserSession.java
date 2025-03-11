@@ -27,6 +27,7 @@ public class UserSession {
     private static final Logger log = LoggerFactory.getLogger(UserSession.class);
 
     public UserDTO getLoggedInUser(HttpServletRequest request) {
+        // TODO when no logged in user, we should still return 200 with additional no-user info rather than 401
         String cookieHeader = request.getHeader("Cookie");
         if (cookieHeader == null) {
             throw new RequestValidationException("No cookie header", HttpStatus.UNAUTHORIZED);
@@ -37,7 +38,11 @@ public class UserSession {
             String[] cookiePair = cookie.split("=");
             cookieMap.put(cookiePair[0].trim(), cookiePair[1]);
         });
-        UserDTO user = fetchUserFromAuthService(cookieMap.get("token"));
+        String token = cookieMap.get("token");
+        if (token == null) {
+            throw new RequestValidationException("Null token", HttpStatus.UNAUTHORIZED);
+        }
+        UserDTO user = fetchUserFromAuthService(token);
         if (user == null) {
             throw new RequestValidationException("Invalid user ID", HttpStatus.UNAUTHORIZED);
         }
