@@ -18,7 +18,7 @@
 	<properties>
 		<maven.compiler.source>22</maven.compiler.source>
 		<maven.compiler.target>22</maven.compiler.target>
-		<javalin.version>6.4.0</javalin.version>
+		<javalin.version>6.6.0</javalin.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<dependencies>
