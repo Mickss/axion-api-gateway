@@ -24,7 +24,8 @@ public class AxionApiGatewayApplication {
                                         rule -> {
                                             rule.allowHost(
                                                     "https://app.disc-golf.pl",
-                                                    "http://localhost:5173"
+                                                    "http://localhost:5173",
+                                                    "https://localhost:7065"
                                             );
                                             rule.allowCredentials = true;
                                         }
