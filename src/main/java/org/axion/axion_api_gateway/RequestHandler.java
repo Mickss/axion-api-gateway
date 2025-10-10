@@ -1,11 +1,7 @@
 package org.axion.axion_api_gateway;
 
 import io.javalin.http.Context;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
+import okhttp3.*;
 import org.axion.axion_api_gateway.config.AppConfig;
 import org.axion.axion_api_gateway.config.ConfigNotFoundException;
 import org.axion.axion_api_gateway.config.ServiceConfig;
@@ -53,11 +49,12 @@ public class RequestHandler {
             log.info("Response received: {}", response.code());
             ctx.status(response.code());
             response.headers().forEach(responseHeader -> {
-                if (!responseHeader.getFirst().equals("Access-Control-Allow-Origin")) {
+                if (!responseHeader.getFirst().equalsIgnoreCase("Access-Control-Allow-Origin")) {
                     ctx.header(responseHeader.getFirst(), responseHeader.getSecond());
                 }
             });
-            ctx.result(Objects.requireNonNull(response.body()).string());
+            byte[] bodyBytes = Objects.requireNonNull(response.body()).bytes();
+            ctx.result(bodyBytes);
         } catch (Exception e) {
             log.error(String.format("Exception while forwarding request to: %s", targetUrl), e);
             ctx.status(500).result("Internal Server Error");
@@ -69,7 +66,7 @@ public class RequestHandler {
         if (contentType == null) {
             return RequestBody.create(ctx.bodyAsBytes());
         } else {
-            return RequestBody.create(ctx.body(), MediaType.parse(contentType));
+            return RequestBody.create(ctx.bodyAsBytes(), MediaType.parse(contentType));
         }
     }
 }
