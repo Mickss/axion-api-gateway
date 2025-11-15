@@ -15,6 +15,9 @@ public class AxionApiGatewayApplication {
     private static UserSession userSession;
 
     public static void main(String[] args) {
+        int port = parsePort(args);
+        log.info("Axion API Gateway Server started on port {}", port);
+
         appConfig = new AppConfig();
         userSession = new UserSession(appConfig);
 
@@ -30,7 +33,7 @@ public class AxionApiGatewayApplication {
                                             rule.allowCredentials = true;
                                         }
                                 )))
-                .start(24001);
+                .start(port);
 
         app.get("/api/current-session", AxionApiGatewayApplication::currentSession);
 
@@ -42,6 +45,26 @@ public class AxionApiGatewayApplication {
 
         app.exception(RequestValidationException.class, (e, ctx) -> ctx.status(e.getHttpStatus().getStatusCode())
                 .result(e.getMessage()));
+    }
+
+    private static int parsePort(String[] args) {
+        int port = 24001;
+
+        for (int i = 0; i < args.length; i++) {
+            if ("-port".equals(args[i]) && i + 1 < args.length) {
+                try {
+                    port = Integer.parseInt(args[i + 1]);
+                    log.info("Port set from command line argument: {}", port);
+                } catch (NumberFormatException e) {
+                    throw new IllegalStateException(
+                            "Invalid port argument: '" + args[i + 1] + "'. Port must be a valid number.",
+                            e
+                    );
+                }
+                break;
+            }
+        }
+        return port;
     }
 
     private static void currentSession(Context ctx) {
